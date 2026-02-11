@@ -12,7 +12,7 @@ This system answers technical ML questions by retrieving and synthesizing inform
 
 ### What It Does
 
-- **Semantic Search**: Finds relevant research across 3K papers using 768-dim embeddings
+- **Semantic Search**: Finds relevant research across 3.6K papers using 768-dim embeddings
 - **Citation Tracking**: Every answer cites source papers with section references
 - **Paper Discovery**: Search mode returns relevant papers with abstracts and excerpts
 - **27-Second Queries**: Optimised retrieval pipeline (down from 2+ minutes in v1)
@@ -22,7 +22,7 @@ This system answers technical ML questions by retrieving and synthesizing inform
 
 - **Hierarchical Retrieval**: 3-sentence chunks → expand to parent sections → rank by relevance
 - **SQLite Database**: Structured storage with automatic section splitting (max 5K words/section)
-- **ChromaDB Vector Store**: 249K embeddings indexed for sub-second similarity search
+- **ChromaDB Vector Store**: 255K embeddings indexed for sub-second similarity search
 - **Two-Stage Generation**: Context extraction (embedding-based) → answer synthesis (Llama 3.1 8B)
 - **Automated Ingestion**: ArXiv API wrapper with LaTeX parsing and duplicate detection
 
@@ -55,6 +55,11 @@ The system went through significant architectural evolution to solve real bottle
 
 These changes transformed the system from a prototype to a production-ready research tool. The architecture now scales to 10K+ papers without performance degradation.
 
+**Storage efficiency**:
+- Vector store: 27GB (255K embeddings + ChromaDB index)
+- Models: 16GB (Llama 3.1 8B 4-bit quantised + embedding model)
+- Total: 43GB (~1.6x reduction from initial 67GB after cleanup)
+
 ## Technical Stack
 
 ```
@@ -75,12 +80,12 @@ ArXiv → LaTeX Parser → SQLite (papers/sections) → Chunker → Embedder →
 | Metric | Value | Notes |
 |--------|-------|-------|
 | **Query Time** | 27 seconds | Average end-to-end (was 120s in v1) |
-| **Papers Indexed** | 3,000+ | cs.AI, cs.LG categories from ArXiv |
-| **Chunks Indexed** | 249,000 | 3-sentence semantic units |
-| **Storage** | 10-15GB | Down from 100GB (raw LaTeX + JSON) |
+| **Papers Indexed** | 3,623 | cs.AI, cs.LG categories from ArXiv |
+| **Chunks Indexed** | 255,000 | 3-sentence semantic units |
+| **Storage** | 43GB | Database (27GB) + Models (16GB) |
 | **Context Window** | 6-12K words | Dynamically extracted per query |
 
-**Optimisation Impact**: Database migration + hierarchical retrieval = 93% faster queries with 90% less storage.
+**Optimisation Impact**: Database migration + hierarchical retrieval = 93% faster queries.
 
 ## Data Sources
 
@@ -95,8 +100,11 @@ ArXiv → LaTeX Parser → SQLite (papers/sections) → Chunker → Embedder →
 ### Quick Start with Docker
 
 **Requirements:**
-- Docker with GPU support (NVIDIA Container Toolkit)
+- Docker with GPU support
+  - **AMD**: ROCm 6.2+ (uses `rocm/pytorch` base image)
+  - **NVIDIA**: NVIDIA Container Toolkit
 - 16GB+ VRAM GPU
+- 50GB+ free disk space
 
 ```bash
 # Build and start services
@@ -175,10 +183,11 @@ python scripts/04_query.py --query "How do transformers handle long sequences?"
 
 ## System Requirements
 
-- **GPU**: 16GB VRAM (AMD or NVIDIA)
-- **RAM**: 32GB
-- **Storage**: ~20GB for papers + models
+- **GPU**: 16GB VRAM (AMD ROCm 6.2+ or NVIDIA CUDA 12+)
+- **RAM**: 32GB recommended
+- **Storage**: ~50GB (27GB vector store + 16GB models + 7GB overhead)
 - **Python**: 3.10+
+- **Docker** (optional): For containerised deployment with GPU support
 
 ## Example Queries & Output
 
@@ -264,16 +273,25 @@ Production approach would incorporate:
 ## Project Structure
 
 ```
+├── .dockerignore                    # Docker build exclusions
+├── .gitignore                       # Git exclusions (data/, models/, .venv/)
+├── Dockerfile                       # Container image for AMD ROCm GPU
+├── docker-compose.yml               # Multi-container orchestration
+├── nginx.conf                       # Frontend reverse proxy config
+├── LICENSE                          # MIT License
+├── README.md                        # This file
+├── requirements.txt                 # Python dependencies
 ├── config/
 │   ├── arxiv_config.yaml            # Default ArXiv search config
 │   └── arxiv_config_targeted.yaml   # Targeted topic search config
 ├── data/
 │   ├── raw/                         # Downloaded .tar.gz LaTeX sources + metadata
+│   ├── paper_manifest.json          # Metadata index for all papers
 │   ├── papers.db                    # SQLite database (papers + sections)
-│   └── vector_store/                # ChromaDB persistence (embeddings)
+│   └── vector_store/                # ChromaDB persistence (255K embeddings)
 ├── models/
 │   ├── embedding/                   # all-mpnet-base-v2 (768-dim)
-│   └── llm/                         # Llama 3.1 8B, Llama 3.2 3B
+│   └── llm/                         # Llama 3.1 8B (4-bit quantised)
 ├── frontend/
 │   ├── index.html                   # Web UI
 │   ├── script.js                    # Application logic
@@ -339,7 +357,7 @@ answer = llm.generate(
 )
 ```
 
-Total time: ~27 seconds (embedding: <1s, search: <1s, LLM: ~25s)
+Total time: ~27 seconds (embedding: <1s, search: <1s, expansion: <1s, LLM: ~25s)
 
 ### Database Schema
 
