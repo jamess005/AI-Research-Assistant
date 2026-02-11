@@ -1,0 +1,47 @@
+# ArXiv API Configuration
+
+# Search parameters
+search:
+  # ArXiv categories to search (comma-separated)
+  # cs.AI = Artificial Intelligence
+  # cs.LG = Machine Learning
+  # cs.CL = Computation and Language
+  # stat.ML = Machine Learning (Statistics)
+  categories:
+    - "cs.AI"
+    - "cs.LG"
+  
+  # Search query (optional - leave empty to get all from categories)
+  query: ""
+  
+  # Maximum number of papers to download
+  max_results: 1000
+  
+  # Date range (YYYYMMDD format, null for no limit)
+  date_from: "20200101"  # Papers from 2020 onwards
+  date_to: null
+  
+  # Sort by (relevance, lastUpdatedDate, submittedDate)
+  sort_by: "submittedDate"
+  sort_order: "descending"
+
+# Download settings
+download:
+  # Directory to save PDFs (relative to project root)
+  pdf_dir: "data/raw"  # Simplified - just raw directory
+  
+  # Rate limiting (seconds between requests)
+  request_delay: 2.0
+  
+  # Retry settings
+  max_retries: 3
+  retry_delay: 5.0
+  
+  # Timeout for downloads (seconds)
+  timeout: 30
+
+# Metadata storage
+metadata:
+  # Save paper metadata to JSON
+  save_metadata: true
+  metadata_file: "data/raw/arxiv_metadata.json"

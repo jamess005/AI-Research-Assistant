@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # Main RAG API service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: arxiv-rag-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist data and models across restarts (not baked into image)
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./config:/app/config:ro
+    environment:
+      - HIP_VISIBLE_DEVICES=0
+      - TRANSFORMERS_CACHE=/app/models
+      - HSA_OVERRIDE_GFX_VERSION=11.0.0
+      - PYTORCH_HIP_ALLOC_CONF=expandable_segments:True
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+    group_add:
+      - "44"    # video
+      - "992"   # render
+    shm_size: '4gb'
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  # Frontend - serves static files, proxies API
+  frontend:
+    image: nginx:alpine
+    container_name: arxiv-rag-frontend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+    depends_on:
+      - api
+
+networks:
+  default:
+    name: arxiv-rag-network

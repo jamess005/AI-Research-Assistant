@@ -1,0 +1,30 @@
+# Core
+requests>=2.31.0
+pyyaml>=6.0.1
+tqdm>=4.66.0
+numpy>=1.24.0
+
+# LaTeX Parsing
+pylatexenc>=2.10
+
+# Embeddings & ML
+sentence-transformers>=2.3.1
+transformers>=4.36.0
+
+# PyTorch - install separately for your platform:
+#   ROCm (AMD): pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.2
+#   CUDA (NVIDIA): pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# Do NOT install torch from this file - it will pull the wrong build
+# torch>=2.5.0
+
+# Quantisation (used by answer_generator.py for 4-bit LLM)
+bitsandbytes>=0.41.0
+accelerate>=0.24.0
+
+# Vector Store
+chromadb>=0.4.22
+
+# API
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.0.0

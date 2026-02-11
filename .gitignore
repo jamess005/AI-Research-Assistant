@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+*.pyc
+dist/
+build/
+
+# Data (large files - downloaded/generated)
+/data/
+/models/
+
+# IDE
+.vscode/
+*.swp
+.idea/
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+.cache/

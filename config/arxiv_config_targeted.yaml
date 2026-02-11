@@ -1,0 +1,59 @@
+# Targeted ArXiv Download Configuration
+# Focus on strengthening weak topic areas identified in coverage analysis
+
+# Search parameters for targeted topic downloads
+search:
+  # Focus on specific weak topics
+  categories:
+    - "cs.LG"  # Machine Learning
+    - "cs.AI"  # Artificial Intelligence
+  
+  # Targeted queries for weak topics (run script multiple times with different configs)
+  # Current focus: Optimization & Training (only 48 papers - need 200+)
+  query: "learning rate OR hyperparameter optimization OR gradient descent OR optimizer OR training dynamics OR learning rate schedule OR adaptive learning rate OR learning rate decay OR warmup OR convergence"
+  
+  # Number of papers per targeted search
+  max_results: 300
+  
+  # Recent papers for up-to-date techniques
+  date_from: "20220101"  # 2022 onwards for modern techniques
+  date_to: null
+  
+  # Sort by relevance to get most relevant papers
+  sort_by: "relevance"
+  sort_order: "descending"
+
+# Download settings (same as main config)
+download:
+  pdf_dir: "data/raw"
+  request_delay: 2.0
+  max_retries: 3
+  retry_delay: 5.0
+  timeout: 30
+
+# Metadata storage
+metadata:
+  save_metadata: true
+  metadata_file: "data/raw/arxiv_metadata.json"  # Will merge with existing
+
+# Alternative targeted queries (switch between runs):
+# Copy one of these to the 'query' field above for different topic runs
+
+alternative_queries:
+  # Optimization & Training (Priority 1 - currently only 48 papers)
+  optimization_training: "learning rate OR hyperparameter optimization OR gradient descent OR optimizer OR training dynamics OR learning rate schedule OR adaptive learning rate OR learning rate decay OR warmup OR convergence"
+  
+  # Hyperparameter Tuning (Priority 2 - only 8 papers)
+  hyperparameter_tuning: "hyperparameter tuning OR hyperparameter optimization OR neural architecture search OR automl OR bayesian optimization OR grid search OR random search OR hyperparameter selection"
+  
+  # Model Compression (Priority 3 - only 15 papers)
+  model_compression: "model compression OR quantization OR pruning OR knowledge distillation OR neural architecture compression OR model acceleration OR efficient inference OR weight sharing"
+  
+  # Transfer Learning (Priority 4 - only 14 papers)
+  transfer_learning: "transfer learning OR domain adaptation OR fine-tuning OR pre-training OR few-shot learning OR meta-learning OR continual learning OR lifelong learning"
+  
+  # Interpretability (Priority 5 - only 2 papers!)
+  interpretability: "interpretability OR explainability OR attention visualization OR saliency maps OR feature attribution OR model explanation OR interpretable machine learning"
+  
+  # Robustness & Security (Priority 6 - only 6 papers)
+  robustness_security: "adversarial robustness OR adversarial training OR adversarial examples OR model security OR backdoor attacks OR privacy attacks OR certified robustness"

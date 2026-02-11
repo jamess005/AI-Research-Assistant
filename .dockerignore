@@ -1,0 +1,48 @@
+# Docker-specific ignores
+.dockerignore
+docker-compose.override.yml
+
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info
+.venv
+venv/
+
+# Data - don't copy into image, mount as volume
+data/raw/*.tar.gz
+data/papers.db
+data/vector_store/
+data/processed/
+
+# Models - don't copy into image, mount as volume  
+models/
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary
+*.tmp
+.cache/
+
+# Development
+.env.local
+docker-compose.override.yml
