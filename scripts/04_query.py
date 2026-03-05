@@ -10,6 +10,7 @@ Usage:
     python 04_query.py --interactive
 """
 
+import os
 import sys
 import json
 import argparse
@@ -20,6 +21,9 @@ from typing import Dict, Optional, Any
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
+
+from dotenv import load_dotenv
+load_dotenv(project_root / ".env")
 
 from src.data.retrieval.vector_store import VectorStore
 from src.data.embedder import Embedder
@@ -293,8 +297,8 @@ def main():
     )
     parser.add_argument(
         "--generation-model", type=str,
-        default="meta-llama/Llama-3.1-8B-Instruct",
-        help="Model for answer generation (default: Llama-3.1-8B-Instruct)"
+        default=os.environ.get('LLM_MODEL_NAME', 'meta-llama/Llama-3.1-8B-Instruct'),
+        help="Model for answer generation (default: LLM_MODEL_NAME env var or Llama-3.1-8B-Instruct)"
     )
     parser.add_argument(
         "--no-quantization", action="store_true",
@@ -317,8 +321,8 @@ def main():
     # Initialize embedder first (needed for vector store queries + context extraction)
     print("\n[1/4] Loading embedder...")
     embedder = Embedder(
-        model_name='all-mpnet-base-v2',
-        cache_dir=str(project_root / "models" / "embedding"),
+        model_name=os.environ.get('EMBEDDING_MODEL_NAME', 'all-mpnet-base-v2'),
+        cache_dir=str(project_root / os.environ.get('EMBEDDING_CACHE_DIR', 'models/embedding')),
         force_gpu=True
     )
     print("  Embedder ready")
@@ -350,7 +354,7 @@ def main():
         'model_name': args.generation_model,
         'device': 'auto',
         'load_in_4bit': not args.no_quantization,
-        'cache_dir': str(project_root / "models" / "llm"),
+        'cache_dir': str(project_root / os.environ.get('LLM_CACHE_DIR', 'models/llm')),
         'max_new_tokens': 1500
     }
     answer_generator = AnswerGenerator(**answer_generator_config)

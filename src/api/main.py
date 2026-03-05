@@ -3,6 +3,7 @@ FastAPI Backend for AI Research Assistant
 Wraps the complete RAG pipeline with streaming support.
 """
 
+import os
 import sys
 import json
 import time
@@ -22,6 +23,9 @@ import uvicorn
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
+
+from dotenv import load_dotenv
+load_dotenv(project_root / ".env")
 
 from src.data.retrieval.vector_store import VectorStore
 from src.data.embedder import Embedder
@@ -51,8 +55,8 @@ async def lifespan(app: FastAPI):
     try:
         logger.info("[1/4] Loading embedder...")
         rag_state.embedder = Embedder(
-            model_name='all-mpnet-base-v2',
-            cache_dir=str(project_root / "models" / "embedding"),
+            model_name=os.environ.get('EMBEDDING_MODEL_NAME', 'all-mpnet-base-v2'),
+            cache_dir=str(project_root / os.environ.get('EMBEDDING_CACHE_DIR', 'models/embedding')),
             force_gpu=True
         )
         
@@ -74,11 +78,11 @@ async def lifespan(app: FastAPI):
         
         logger.info("[4/4] Loading answer generation model (Llama 8B)...")
         rag_state.answer_generator = AnswerGenerator(
-            model_name='meta-llama/Llama-3.1-8B-Instruct',
+            model_name=os.environ.get('LLM_MODEL_NAME', 'meta-llama/Llama-3.1-8B-Instruct'),
             device='auto',
             load_in_4bit=True,
             max_new_tokens=1500,
-            cache_dir=str(project_root / "models" / "llm")
+            cache_dir=str(project_root / os.environ.get('LLM_CACHE_DIR', 'models/llm'))
         )
         
         logger.info("AI Research Assistant ready")

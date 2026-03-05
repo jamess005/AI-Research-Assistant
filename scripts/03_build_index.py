@@ -9,6 +9,7 @@ Builds vector index directly from database sections:
 - GPU-accelerated embeddings
 """
 
+import os
 import sys
 from pathlib import Path
 import argparse
@@ -18,6 +19,9 @@ import numpy as np
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
+
+from dotenv import load_dotenv
+load_dotenv(project_root / ".env")
 
 from src.data.database_schema import PapersDatabase
 from src.data.database_chunker import DatabaseChunker
@@ -183,8 +187,8 @@ def rebuild_index_from_database(
     print("="*80)
     
     embedder = Embedder(
-        model_name='all-mpnet-base-v2',
-        cache_dir=str(project_root / "models" / "embedding"),
+        model_name=os.environ.get('EMBEDDING_MODEL_NAME', 'all-mpnet-base-v2'),
+        cache_dir=str(project_root / os.environ.get('EMBEDDING_CACHE_DIR', 'models/embedding')),
         force_gpu=True
     )
     

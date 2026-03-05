@@ -10,6 +10,7 @@ Runs the complete pipeline autonomously:
 Pipeline stores all data in SQLite database (no JSON intermediates).
 """
 
+import os
 import sys
 from pathlib import Path
 import json
@@ -22,6 +23,9 @@ import yaml
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
+
+from dotenv import load_dotenv
+load_dotenv(project_root / ".env")
 
 from src.api.arxiv_client import ArxivClient
 from src.data.latex_parser import LatexParser
@@ -476,8 +480,8 @@ class PipelineOrchestrator:
         # Load embedder
         print("\nLoading embedding model (GPU)...")
         embedder = Embedder(
-            model_name='all-mpnet-base-v2',
-            cache_dir=str(self.project_root / "models" / "embedding"),
+            model_name=os.environ.get('EMBEDDING_MODEL_NAME', 'all-mpnet-base-v2'),
+            cache_dir=str(self.project_root / os.environ.get('EMBEDDING_CACHE_DIR', 'models/embedding')),
             force_gpu=True
         )
 
